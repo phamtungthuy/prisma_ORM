@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root@127.0.0.1:3308/classicmodels"
+}
+
+model customers {
+  customerNumber   Int      @id @default(autoincrement())
+  customerName     String
+  contactLastName  String
+  contactFirstName String
+  phone            String
+  addressLine1     String
+  addressLine2     String?
+  city             String
+  state            String?
+  postalCode       String?
+  country          String
+  salesRepEmployeeNumber Int?
+  creditLimit      Float?
+  employee employees? @relation("sales_rep_employee", fields: [salesRepEmployeeNumber], references: [employeeNumber])
+}
+
+model employees {
+  employeeNumber   Int      @id @default(autoincrement())
+  lastName         String
+  firstName        String
+  extension        String
+  email            String
+  officeCode       String
+  reportsTo        Int?
+  jobTitle         String
+  customers      customers[] @relation("sales_rep_employee")
+}
+
+model Office {
+  officeCode       String   @id
+  city             String
+  phone            String
+  addressLine1     String
+  addressLine2     String?
+  state            String?
+  country          String
+  postalCode       String?
+}
+
+model Order {
+  orderNumber      Int      @id
+  orderDate        DateTime
+  requiredDate     DateTime
+  shippedDate      DateTime?
+  status           String
+  comments         String?
+}
+
+model OrderDetail {
+  orderNumber      Int
+  productCode      String
+  quantityOrdered  Int
+  priceEach        Float
+  @@id([orderNumber, productCode])
+}
+
+model Product {
+  productCode      String   @id
+  productName      String
+  productLine      String
+  productScale     String
+  productVendor    String
+  productDescription String
+  quantityInStock  Int
+  buyPrice         Float
+  MSRP             Float
+}

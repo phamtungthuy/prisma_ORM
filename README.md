@@ -1,0 +1,4 @@
+- chạy npm install để tải các modules cần thiết
+- chỉnh sửa đường dẫn đến cơ sở dữ liệu trong file .env
+- chạy npx prisma generate
+- chạy npm start để chạy server
