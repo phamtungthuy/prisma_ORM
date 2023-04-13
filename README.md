@@ -2,3 +2,6 @@
 - chỉnh sửa đường dẫn đến cơ sở dữ liệu trong file .env
 - chạy npx prisma generate
 - chạy npm start để chạy server
+- npm start để chạy server (mặc định cổng 8000, có thể thay đổi port trong file .env)
+- đường dẫn / trả về json chứa các customers với orders
+- đường dẫn /api/get-customers-with-orders chứa các customers có id = 114 với orders

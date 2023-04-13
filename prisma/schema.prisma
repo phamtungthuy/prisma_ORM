@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root@127.0.0.1:3308/classicmodels"
+  url      = env("DATABASE_URL")
 }
 
 model customers {
@@ -24,7 +24,9 @@ model customers {
   country          String
   salesRepEmployeeNumber Int?
   creditLimit      Float?
-  employee employees? @relation("sales_rep_employee", fields: [salesRepEmployeeNumber], references: [employeeNumber])
+  employees employees? @relation("sales_rep_employee", fields: [salesRepEmployeeNumber], references: [employeeNumber])
+  orders orders[] @relation("orders_ibfk_1")
+  payments payments[] @relation("payments_ibfk_1")
 }
 
 model employees {
@@ -37,9 +39,13 @@ model employees {
   reportsTo        Int?
   jobTitle         String
   customers      customers[] @relation("sales_rep_employee")
+  subordinates     employees[] @relation("employees_ibfk_1")
+  manager          employees?  @relation("employees_ibfk_1", fields: [reportsTo], references: [employeeNumber])
+  offices offices? @relation("employees_ibfk_2", fields: [officeCode], references: [officeCode])
+
 }
 
-model Office {
+model offices {
   officeCode       String   @id
   city             String
   phone            String
@@ -47,27 +53,53 @@ model Office {
   addressLine2     String?
   state            String?
   country          String
-  postalCode       String?
+  postalCode       String
+  territory        String
+  employees employees[] @relation("employees_ibfk_2")
 }
 
-model Order {
+model orders {
   orderNumber      Int      @id
   orderDate        DateTime
   requiredDate     DateTime
   shippedDate      DateTime?
   status           String
   comments         String?
+  customerNumber   Int
+  orderdetails orderdetails[] @relation("orderdetails_ibfk_1")
+  customers customers? @relation("orders_ibfk_1", fields: [customerNumber], references: [customerNumber])
 }
 
-model OrderDetail {
+model orderdetails {
   orderNumber      Int
   productCode      String
   quantityOrdered  Int
   priceEach        Float
+  orderLineNumber Int
+  orders orders? @relation("orderdetails_ibfk_1", fields: [orderNumber], references: [orderNumber])
+  products products? @relation("orderdetails_ibfk_2", fields: [productCode], references: [productCode])
   @@id([orderNumber, productCode])
 }
 
-model Product {
+model payments {
+  customerNumber Int
+  checkNumber String
+  paymentDate DateTime
+  amount Float
+  @@id([customerNumber, checkNumber])
+  customers customers? @relation("payments_ibfk_1", fields: [customerNumber], references: [customerNumber])
+
+}
+
+model productlines {
+  productLine String @id
+  textDescription String
+  htmlDescription String
+  image Bytes
+  products products[] @relation("products_ibfk_1")
+}
+
+model products {
   productCode      String   @id
   productName      String
   productLine      String
@@ -77,4 +109,6 @@ model Product {
   quantityInStock  Int
   buyPrice         Float
   MSRP             Float
+  orderdetails orderdetails[] @relation("orderdetails_ibfk_2")
+  productlines productlines? @relation("products_ibfk_1", fields: [productLine], references: [productLine])
 }
